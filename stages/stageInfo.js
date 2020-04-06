@@ -16,6 +16,13 @@ function Stage(id, name) {
 		return (area.xMin <= x && x <= area.xMax &&
 		        area.yMin <= y && y <= area.yMax);
 	}
+	this.isOffStage = function(x) {
+		if (this.baseArea == undefined) {
+			return false;
+		}
+		const area = this.baseArea;
+		return (area.xMin <= x && x <= area.xMax);
+	}
 	this.isOnAPlatform = function(x, y) {
 		const areas = Object.values(this.platforms);
 	  for (var i=0; i<areas.length; i++) {
