@@ -66,6 +66,7 @@ class platformUpThrow extends Scenario{
 					//
 					// Will this accidentally catch some frames of certain up-throws?
 					// Going to assume that damage occurs as the character enters hitstun.
+					// ^ I think starting loop from fIndex + 1 covers this case...
 					return result;
 				}
 			}
