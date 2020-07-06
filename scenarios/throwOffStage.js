@@ -10,14 +10,12 @@ const { stages: stages, stageList: stageList, Area: Area }
 	= require('../stages/stageInfo.js');
 const Scenario = require('./scenario.js');
 
-debugger;
-
 // Scenarios must implement testFrame(frame, index) and 
 // preValidate(game) methods. 
 
 // Utility function for checking inclusion
 function isOrIn(item, container) {
-	if Array.isArray(container) {
+	if (Array.isArray(container)) {
 		return container.includes(item);
 	} else {
 		return item == container;
@@ -56,12 +54,12 @@ class throwOffStage extends Scenario{
 					return result;
 				}
 
-				actionState = target.post.actionStateId;
+				const actionState = target.post.actionStateId;
 				if (slp.isDamaged(actionState)) {
 					// Check if off stage
 					const x = target.post.positionX;
 					const y = target.post.positionY;
-					if (stage.isOffStage(x, y)) {
+					if (stage.isOffStage(x)) {
 						result.offStage = true;
 						return result;
 					}
@@ -71,6 +69,8 @@ class throwOffStage extends Scenario{
 					return result;
 				}
 			}
+			result.endFrame = i;
+			return result;
 		}
 
 		this.testFrame = function(frames, index) {
@@ -96,16 +96,19 @@ class throwOffStage extends Scenario{
 				for (var j=0; j<nPotentialTargets; j++){
 					let tIndex = this.targetIndices[j];
 					if (tIndex == aIndex) {
-						break; // Actor and target cannot be the same
+						continue; // Actor and target cannot be the same
 					}
 					let target = frame.players[tIndex];
 					let targetPrev = prevFrame.players[tIndex];
 					let damage = target.post.percent - targetPrev.post.percent
 					if (damage <= 0 || target.post.lastHitBy != aIndex) {
-						break; // Move on to next potential target
+						continue; // Move on to next potential target
 					}
 					// Check if throw led to being off stage
-					result = this.wasThrownOffStage(frames, index, this.frameRange, tIndex);
+					const result = this.wasThrownOffStage(frames, index, this.frameRange, tIndex);
+					if (result == undefined) {
+						debugger;
+					}
 					if (result.offStage) {
 						const aPort = aIndex + 1;
 						const tPort = tIndex + 1;
@@ -117,6 +120,8 @@ class throwOffStage extends Scenario{
 					}
 				}
 			}
+			return { isStartOf: false,
+				       skipTo: index }
 		}
 
 		this.preValidate = function(game){
@@ -153,20 +158,20 @@ class throwOffStage extends Scenario{
 			for (var i=0; i<nPlayers; i++) {
 				let charValid = false;
 				let character = settings.players[i].characterId;
+				let index = settings.players[i].playerIndex;
 				// TODO: Allow sheik/zelda to count as each other
 				if (isOrIn(character, this.actor) || this.actor == 'any'){
-					this.actorIndices.push(i);
+					this.actorIndices.push(index);
 					charValid = true;
 				}
 				if (isOrIn(character, this.target) || this.target == 'any') {
-					this.targetIndices.push(i);
+					this.targetIndices.push(index);
 					charValid = true;
 				}
 				if (charValid == false) {
 					return false;
 				}
 			}
-
 			// These should be superceded by actorIndices and 
 			// targetIndices.
 //			this.pIndex1 = settings.players[0].playerIndex;

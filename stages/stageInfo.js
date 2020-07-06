@@ -21,7 +21,7 @@ function Stage(id, name) {
 			return false;
 		}
 		const area = this.baseArea;
-		return (area.xMin <= x && x <= area.xMax);
+		return !(area.xMin <= x && x <= area.xMax);
 	}
 	this.isOnAPlatform = function(x, y) {
 		const areas = Object.values(this.platforms);
